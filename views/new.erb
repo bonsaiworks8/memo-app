@@ -1,0 +1,14 @@
+<div class="bl_form">
+  <p class="hp_fontSizeLarge hp_mbMedium">メモの登録</p>
+  <form method="POST" action="/memos">
+    <div>
+      <label class="hp_fontSizeMedium hp_mbSmall" for="title">タイトル</label>
+      <input class="hp_fontSizeMedium hp_mbMedium" type="text" id="title" name="title" value="<%= @title %>">
+    </div>
+    <div>
+      <label class="hp_fontSizeMedium hp_mbSmall" for="body">内容</label>
+      <textarea class="hp_fontSizeMedium hp_mbMedium" id="body" name="body"><%= @body %></textarea>
+    </div>
+    <input type="submit" class="el_button" value="登録">
+  </form>
+</div>

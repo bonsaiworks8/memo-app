@@ -1,0 +1,23 @@
+<div class="bl_grid hp_minHeightLarge">
+  <% if @memos.nil? || @memos.length == 0 %>
+  <p class="hp_fontSizeMedium hp_textAlignCenter">
+    表示できるメモはありません
+  </p>
+  <% else %>
+  <% @memos.each do |memo| %>
+  <div class="bl_gridItem">
+    <div class="bl_memo">
+      <div class="bl_memo_inner">
+        <div class="bl_memo_icons">
+          <a href="/memos/show/<%= memo[:id] %>"><i class="fas fa-eye fa-2x hp_textBlack hp_mrMedium"></i></a>
+          <a href="/memos/edit/<%= memo[:id] %>"><i class="fas fa-edit fa-2x hp_textBlack hp_mrMedium"></i></a>
+          <a href="/memos/delete/<%= memo[:id] %>"><i class="fas fa-trash fa-2x hp_textBlack"></i></a>
+        </div>
+        <h1 class="bl_memo_title hp_fontSizeExMedium hp_mbSmall hp_textAlignCenter"><%= escape memo[:title] %></h1>
+        <p class="bl_memo_body hp_fontSizeMedium hp_textAlignJustify"><%= escape memo[:body]  %></p>
+      </div>
+    </div>
+  </div>
+  <% end %>
+  <% end %>
+</div>
