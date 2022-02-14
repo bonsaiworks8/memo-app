@@ -21,7 +21,7 @@ class AppTest < MiniTest::Test
   end
 
   def test_get
-    ['/', '/memos', '/memos/show/1', '/memos/new', '/memos/edit/1'].each_with_index do |uri, i|
+    ['/', '/memos', '/memos/show/1', '/memos/new', '/memos/edit/1', '/memos/delete/1'].each_with_index do |uri, i|
       get uri
 
       assert last_response.ok?
@@ -30,12 +30,15 @@ class AppTest < MiniTest::Test
         assert last_response.body.include? '2022年2月7日の天気'
       elsif i == 2
         assert last_response.body.include? 'メモの詳細'
+        assert_include_content1
       elsif i == 3
         assert last_response.body.include? 'メモの登録'
       elsif i == 4
         assert last_response.body.include? 'メモの編集'
+        assert_include_content1
       else
         assert last_response.body.include? 'メモの削除'
+        assert_include_content1
       end
     end
   end
@@ -72,7 +75,9 @@ class AppTest < MiniTest::Test
 
   def test_exclusive_post_new
     lock_data_file
+
     post '/memos', title: '2022年2月8日の天気', body: '雨'
+    assert_equal 200, last_response.status
     assert last_response.body.include? MemoGeneric::SAVE_FAILURE
   end
 
@@ -116,5 +121,10 @@ class AppTest < MiniTest::Test
         sleep 1 if file.flock(File::LOCK_EX)
       end
     end
+  end
+
+  def assert_include_content1
+    assert last_response.body.include? '今日の夕飯の献立'
+    assert last_response.body.include? "・ハンバーグ\r\n・サラダ\r\n・お味噌汁"
   end
 end

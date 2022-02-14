@@ -13,22 +13,19 @@ class MemoJson < MemoGeneric
   def find(id)
     records = read_file DATA_FILE_PATH
 
-    records.each do |record|
-      return record if record[:id].to_i == id.to_i
-    end
-
-    nil
+    records.find { |record| record[:id].to_i == id.to_i }
   end
 
   def save(title, body)
     records = read_file DATA_FILE_PATH
 
-    push_id = 0
-    records.each do |record|
-      id = record[:id].to_i
-      push_id = id if id > push_id
-    end
-    push_id += 1
+    id_list = records.map { |record| record[:id].to_i }
+    push_id =
+      if id_list.empty?
+        1
+      else
+        id_list.max + 1
+      end
     records.push({ id: push_id.to_s, title: title.to_s, body: body.to_s })
 
     write_file DATA_FILE_PATH, records

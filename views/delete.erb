@@ -1,12 +1,12 @@
 <p class="hp_fontSizeLarge hp_mbMedium">メモの削除</p>
 <div class="bl_memo hp_mbMedium hp_minHeightSmall">
   <div class="bl_memo_inner">
-    <h1 class="bl_memo_title hp_fontSizeExMedium hp_mbSmall hp_textAlignCenter"><%= escape @title %></h1>
-    <p class="bl_memo_body hp_fontSizeMedium hp_textAlignJustify"><%= escape @body %></p>
+    <h1 class="bl_memo_title hp_fontSizeExMedium hp_mbSmall hp_textAlignCenter"><%= escape @memo[:title] %></h1>
+    <p class="bl_memo_body hp_fontSizeMedium hp_textAlignJustify"><%= escape @memo[:body] %></p>
   </div>
 </div>
 <div class="bl_form">
-  <form method="POST" action="/memos/<%= @id %>">
+  <form method="POST" action="/memos/<%= @memo[:id] %>">
     <input type="hidden" name="_method" value="DELETE">
     <input type="submit" class="el_button" value="削除">
   </form>

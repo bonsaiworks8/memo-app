@@ -3,11 +3,11 @@
   <form method="POST" action="/memos">
     <div>
       <label class="hp_fontSizeMedium hp_mbSmall" for="title">タイトル</label>
-      <input class="hp_fontSizeMedium hp_mbMedium" type="text" id="title" name="title" value="<%= @title %>">
+      <input class="hp_fontSizeMedium hp_mbMedium" type="text" id="title" name="title" value="<%= @memo[:title] %>">
     </div>
     <div>
       <label class="hp_fontSizeMedium hp_mbSmall" for="body">内容</label>
-      <textarea class="hp_fontSizeMedium hp_mbMedium" id="body" name="body"><%= @body %></textarea>
+      <textarea class="hp_fontSizeMedium hp_mbMedium" id="body" name="body"><%= @memo[:body] %></textarea>
     </div>
     <input type="submit" class="el_button" value="登録">
   </form>

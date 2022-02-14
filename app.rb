@@ -11,12 +11,6 @@ helpers do
   def escape(text)
     Rack::Utils.escape_html(text)
   end
-
-  def empty?(title, body)
-    result = title.empty? || body.empty?
-    session[:error] = MemoGeneric::BLANK_ERROR if result
-    result
-  end
 end
 
 configure do
@@ -28,17 +22,11 @@ before do
 end
 
 before '/memos/:action/:id' do
-  memo = @memo_model.find params[:id].to_i
-  @title = memo[:title]
-  @body = memo[:body]
-
-  @id = params[:id].to_i if params[:action] != 'show'
+  @memo = @memo_model.find params[:id].to_i
 end
 
-before '/memos/:id' do
-  @id = params[:id]
-  @title = params[:title]
-  @body = params[:body]
+before ['/memos/:id', '/memos'] do
+  @memo = { id: params[:id], title: params[:title], body: params[:body] }
 end
 
 get '/memos/new' do
@@ -46,25 +34,19 @@ get '/memos/new' do
 end
 
 post '/memos' do
-  title = params[:title]
-  body = params[:body]
+  if MemoGeneric.empty? @memo[:title], @memo[:body]
+    session[:error] = MemoGeneric::BLANK_ERROR
+    return erb :new
+  end
 
-  if empty? title, body
-    @title = title
-    @body = body
-    erb :new
-  else
-    begin
-      if @memo_model.save title, body
-        session[:notify] = MemoGeneric::SAVE_COMPLETED
-        redirect to('/memos'), 303
-      end
-    rescue StandardError
-      session[:error] = MemoGeneric::SAVE_FAILURE
-      @title = title
-      @body = body
-      erb :new
+  begin
+    if @memo_model.save @memo[:title], @memo[:body]
+      session[:notify] = MemoGeneric::SAVE_COMPLETED
+      redirect to('/memos'), 303
     end
+  rescue StandardError
+    session[:error] = MemoGeneric::SAVE_FAILURE
+    erb :new
   end
 end
 
@@ -84,20 +66,21 @@ get '/memos/edit/:id' do
 end
 
 patch '/memos/:id' do
-  if empty? @title, @body
-    erb :edit
-  else
-    begin
-      if @memo_model.update @id.to_i, @title, @body
-        session[:notify] = MemoGeneric::SAVE_COMPLETED
-        redirect to('/memos'), 303
-      else
-        not_found
-      end
-    rescue StandardError
-      session[:error] = MemoGeneric::SAVE_FAILURE
-      erb :edit
+  if MemoGeneric.empty? @memo[:title], @memo[:body]
+    session[:error] = MemoGeneric::BLANK_ERROR
+    return erb :edit
+  end
+
+  begin
+    if @memo_model.update @memo[:id].to_i, @memo[:title], @memo[:body]
+      session[:notify] = MemoGeneric::SAVE_COMPLETED
+      redirect to('/memos'), 303
+    else
+      not_found
     end
+  rescue StandardError
+    session[:error] = MemoGeneric::SAVE_FAILURE
+    erb :edit
   end
 end
 
@@ -106,7 +89,7 @@ get '/memos/delete/:id' do
 end
 
 delete '/memos/:id' do
-  if @memo_model.destroy @id.to_i
+  if @memo_model.destroy @memo[:id].to_i
     session[:notify] = MemoGeneric::DELETE_COMPLETED
     redirect to('/memos'), 303
   else
@@ -114,12 +97,10 @@ delete '/memos/:id' do
   end
 rescue StandardError
   session[:error] = MemoGeneric::DELETE_FAILURE
-  memo = @memo_model.find params[:id].to_i
-  @title = memo[:title]
-  @body = memo[:body]
+  @memo = @memo_model.find params[:id].to_i
   erb :delete
 end
 
 not_found do
-  '404 Not Found.<br>そのようなページはございません。'
+  erb :not_found
 end

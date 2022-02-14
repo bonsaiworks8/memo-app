@@ -26,4 +26,8 @@ class MemoGeneric
   def destroy(_id)
     raise NotImplementedError, 'destroyメソッドが実装されていません'
   end
+
+  def self.empty?(title, body)
+    title.empty? || body.empty?
+  end
 end
