@@ -26,7 +26,7 @@ before '/memos/:action/:id' do
 end
 
 before ['/memos/:id', '/memos'] do
-  @memo = { id: params[:id], title: params[:title], body: params[:body] }
+  @memo = params.slice(:id, :title, :body)
 end
 
 get '/memos/new' do

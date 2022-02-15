@@ -20,12 +20,7 @@ class MemoJson < MemoGeneric
     records = read_file DATA_FILE_PATH
 
     id_list = records.map { |record| record[:id].to_i }
-    push_id =
-      if id_list.empty?
-        1
-      else
-        id_list.max + 1
-      end
+    push_id = id_list.empty? ? 1 : id_list.max + 1
     records.push({ id: push_id.to_s, title: title.to_s, body: body.to_s })
 
     write_file DATA_FILE_PATH, records
