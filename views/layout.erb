@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <title>メモアプリ</title>
+  <meta name="description" content="メモ用Webアプリです。">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+
+  <link rel="stylesheet" href="https://unpkg.com/ress/dist/ress.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+
+  <link href="https://use.fontawesome.com/releases/v5.6.1/css/all.css" rel="stylesheet">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</head>
+
+<body>
+  <header class="ly_header">
+    <div class="ly_header_inner">
+      <nav class="bl_nav hp_pbSmall">
+        <div class="bl_nav_mobile bl_nav_mobile__rev">
+          <div class="el_hamburgerIcon js_hamburgerIcon">
+            <div class="el_hamburgerIcon_line"></div>
+          </div>
+          <div class="el_fullOverlay js_mobileNavMenuClosePanel"></div>
+          <div class="bl_nav_mobile_menu js_mobileNavMenu is_close">
+            <h1 class="bl_nav_mobile_menuTitle hp_fontSizeLarge">メニュー</h1>
+            <ul>
+              <li class="bl_nav_item"><a href="/memos">メモ一覧</a></li>
+              <li class="bl_nav_item"><a href="/memos/new">メモの登録</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="bl_nav_notMobile">
+          <ul class="bl_nav_notMobile_list">
+            <li class="bl_nav_item"><a href="/memos">メモ一覧</a></li>
+            <li class="bl_nav_item"><a href="/memos/new">メモの登録</a></li>
+          </ul>
+
+          <!--右側に要素追加可能-->
+        </div>
+      </nav>
+    </div>
+
+    <h1 class="el_headerTitle hp_fontSizeLarge hp_textAlignCenter">メモアプリ</h1>
+  </header>
+
+  <% if session[:notify] %>
+  <div class="el_flash hp_fontSizeExMedium js_flash is_close">
+    <div class="hp_textAlignCenter">
+      <div>
+        <%= session[:notify] %>
+        <% session[:notify] = nil %>
+      </div>
+      <div class="el_closeIcon js_flash_closeIcon">
+        <div class="el_closeIcon_line"></div>
+      </div>
+    </div>
+  </div>
+  <% elsif session[:error] %>
+  <div class="el_error hp_fontSizeExMedium js_flash is_close">
+    <div class="hp_textAlignCenter">
+      <div>
+        <%= session[:error] %>
+        <% session[:error] = nil %>
+      </div>
+      <div class="el_closeIcon js_flash_closeIcon">
+        <div class="el_closeIcon_line"></div>
+      </div>
+    </div>
+  </div>
+  <% end %>
+
+  <main>
+    <article>
+      <section class="ly_content hp_textAlignCenter">
+        <div class="ly_content_inner">
+          <%= yield %>
+        </div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <div class="ly_footer">
+      <div class="ly_footer_inner hp_textAlignCenter">
+        <small class="hp_textWhite">
+          Copyright &copy;2022 bonsaiworks8, All Rights Reserved.
+        </small>
+      </div>
+    </div>
+  </footer>
+
+  <script type="text/javascript" src="/js/navigation_drawer.js"></script>
+  <script type="text/javascript" src="/js/flash.js"></script>
+</body>
+
+</html>
