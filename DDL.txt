@@ -1,0 +1,11 @@
+drop table if exists memos;
+create table memos (
+  id serial,
+  title text,
+  body text,
+  primary key (id)
+);
+
+insert into memos(title, body) values ('今日の夕飯の献立', E'・ハンバーグ\n・サラダ\n・お味噌汁');
+insert into memos(title, body) values ('2022年2月7日の天気', '晴れ');
+insert into memos(title, body) values ('2022年2月7日の運勢', '大吉');

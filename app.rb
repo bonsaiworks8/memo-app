@@ -3,9 +3,10 @@
 require 'sinatra'
 require 'sinatra/reloader'
 
-# require_relative "./lib/memo_generic"
-# require_relative "./lib/memo_mock"
-require_relative './lib/memo_json'
+require_relative './lib/memo_generic'
+# require_relative './lib/memo_mock'
+# require_relative './lib/memo_json'
+require_relative './lib/memo_pgdb'
 
 helpers do
   def escape(text)
@@ -18,7 +19,11 @@ configure do
 end
 
 before do
-  @memo_model = MemoJson.new
+  @memo_model = MemoPgDB.new
+end
+
+after do
+  @memo_model.close
 end
 
 before '/memos/:action/:id' do

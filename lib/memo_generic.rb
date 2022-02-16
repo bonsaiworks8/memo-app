@@ -27,6 +27,10 @@ class MemoGeneric
     raise NotImplementedError, 'destroyメソッドが実装されていません'
   end
 
+  def close
+    raise NotImplementedError, 'closeメソッドが実装されていません'
+  end
+
   def self.empty?(title, body)
     title.empty? || body.empty?
   end
