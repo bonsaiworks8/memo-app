@@ -10,18 +10,13 @@ ENV['RACK_ENV'] = 'test'
 class AppTest < MiniTest::Test
   include Rack::Test::Methods
 
-  MOCK_TEST = 0
-  JSON_TEST = 1
-  PGDB_TEST = 2
-
   def app
-    # switch test
-    @test_number = PGDB_TEST
+    @test_number = :pgdb
 
     case @test_number
-    when JSON_TEST
+    when :json
       initialize_memo_file
-    when PGDB_TEST
+    when :pgdb
       initialize_memo_db
     end
 
@@ -87,7 +82,7 @@ class AppTest < MiniTest::Test
   end
 
   def test_exclusive_post_new
-    return unless @test_number == JSON_TEST
+    return unless @test_number == :json
 
     lock_data_file
 
@@ -97,7 +92,7 @@ class AppTest < MiniTest::Test
   end
 
   def test_exclusive_post_edit
-    return unless @test_number == JSON_TEST
+    return unless @test_number == :json
 
     lock_data_file
 
@@ -107,7 +102,7 @@ class AppTest < MiniTest::Test
   end
 
   def test_exclusive_post_delete
-    return unless @test_number == JSON_TEST
+    return unless @test_number == :json
 
     lock_data_file
 
