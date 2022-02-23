@@ -8,20 +8,28 @@ class MemoPgDB
   end
 
   def all
-    result = @db_connect.exec('select * from memos')
+    result = @db_connect.exec('SELECT * FROM memos')
 
     result.map do |row|
       { id: row['id'], title: row['title'], body: row['body'] }
     end
   end
 
-  def save(title, body)
-    @db_connect.exec("INSERT INTO memos(title, body) VALUES ('#{escape_str(title)}', '#{escape_str(body)}')")
+  def save(_title, body)
+    query = 'INSERT INTO memos(title, body) VALUES ($1, $2)'
+    prepare_name = 'save'
+    begin
+      exec_prepared query, prepare_name, [titile, body]
+    rescue StandardError
+      true
+    end
     true
   end
 
   def find(id)
-    result = @db_connect.exec("SELECT * FROM memos WHERE id = #{escape_str(id.to_s)}")
+    query = 'SELECT * FROM memos WHERE id = $1'
+    prepare_name = 'find'
+    result = exec_prepared query, prepare_name, [id]
 
     record = nil
     result.each do |row|
@@ -30,17 +38,25 @@ class MemoPgDB
     record
   end
 
-  def update(id, title, body)
+  def update(id, _title, body)
     return false if find(id).nil?
 
-    @db_connect.exec("UPDATE memos SET title = '#{escape_str(title)}', body = '#{escape_str(body)}' WHERE id = #{escape_str(id.to_s)}")
+    query = 'UPDATE memos SET title = $2, body = $3 WHERE id = $1'
+    prepare_name = 'update'
+    begin
+      exec_prepared query, prepare_name, [id, titile, body]
+    rescue StandardError
+      true
+    end
     true
   end
 
   def destroy(id)
     return false if find(id).nil?
 
-    @db_connect.exec("DELETE FROM memos WHERE id = #{escape_str(id.to_s)}")
+    query = 'DELETE FROM memos WHERE id = $1'
+    prepare_name = 'destroy'
+    exec_prepared query, prepare_name, [id]
     true
   end
 
@@ -50,7 +66,8 @@ class MemoPgDB
 
   private
 
-  def escape_str(str)
-    PG::Connection.escape_string str
+  def exec_prepared(query, prepare_name, parameters)
+    @db_connect.prepare(prepare_name, query)
+    @db_connect.exec_prepared(prepare_name, parameters)
   end
 end
