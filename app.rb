@@ -17,15 +17,15 @@ configure do
 end
 
 before do
-  @memo_model = MemoPgDB.new
+  @memo_manipulator = MemoPgDB.new
 end
 
 after do
-  @memo_model.close
+  @memo_manipulator.close
 end
 
 before '/memos/:action/:id' do
-  @memo = @memo_model.find params[:id].to_i
+  @memo = @memo_manipulator.find params[:id].to_i
 end
 
 before ['/memos/:id', '/memos'] do
@@ -42,20 +42,15 @@ post '/memos' do
     return erb :new
   end
 
-  begin
-    if @memo_model.save @memo[:title], @memo[:body]
-      session[:notify] = MemoGeneric::SAVE_COMPLETED
-      redirect to('/memos'), 303
-    end
-  rescue StandardError
-    session[:error] = MemoGeneric::SAVE_FAILURE
-    erb :new
+  if @memo_manipulator.save @memo[:title], @memo[:body]
+    session[:notify] = MemoGeneric::SAVE_COMPLETED
+    redirect to('/memos'), 303
   end
 end
 
 ['/', '/memos'].each do |uri|
   get uri do
-    @memos = @memo_model.all
+    @memos = @memo_manipulator.all
     erb :index
   end
 end
@@ -74,16 +69,11 @@ patch '/memos/:id' do
     return erb :edit
   end
 
-  begin
-    if @memo_model.update @memo[:id].to_i, @memo[:title], @memo[:body]
-      session[:notify] = MemoGeneric::SAVE_COMPLETED
-      redirect to('/memos'), 303
-    else
-      not_found
-    end
-  rescue StandardError
-    session[:error] = MemoGeneric::SAVE_FAILURE
-    erb :edit
+  if @memo_manipulator.update @memo[:id].to_i, @memo[:title], @memo[:body]
+    session[:notify] = MemoGeneric::SAVE_COMPLETED
+    redirect to('/memos'), 303
+  else
+    not_found
   end
 end
 
@@ -92,16 +82,12 @@ get '/memos/delete/:id' do
 end
 
 delete '/memos/:id' do
-  if @memo_model.destroy @memo[:id].to_i
+  if @memo_manipulator.destroy @memo[:id].to_i
     session[:notify] = MemoGeneric::DELETE_COMPLETED
     redirect to('/memos'), 303
   else
     not_found
   end
-rescue StandardError
-  session[:error] = MemoGeneric::DELETE_FAILURE
-  @memo = @memo_model.find params[:id].to_i
-  erb :delete
 end
 
 not_found do
