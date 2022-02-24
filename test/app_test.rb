@@ -11,14 +11,7 @@ class AppTest < MiniTest::Test
   include Rack::Test::Methods
 
   def app
-    @test_number = :pgdb
-
-    case @test_number
-    when :json
-      initialize_memo_file
-    when :pgdb
-      initialize_memo_db
-    end
+    initialize_memo_db
 
     Sinatra::Application
   end
@@ -81,62 +74,7 @@ class AppTest < MiniTest::Test
     assert_equal 404, last_response.status
   end
 
-  def test_exclusive_post_new
-    return unless @test_number == :json
-
-    lock_data_file
-
-    post '/memos', title: '2022年2月8日の天気', body: '雨'
-    assert_equal 200, last_response.status
-    assert last_response.body.include? MemoGeneric::SAVE_FAILURE
-  end
-
-  def test_exclusive_post_edit
-    return unless @test_number == :json
-
-    lock_data_file
-
-    patch '/memos/1', title: '今日の夕飯の献立', body: "・カツカレー\n・サラダ"
-    assert_equal 200, last_response.status
-    assert last_response.body.include? MemoGeneric::SAVE_FAILURE
-  end
-
-  def test_exclusive_post_delete
-    return unless @test_number == :json
-
-    lock_data_file
-
-    delete '/memos/1'
-    assert_equal 200, last_response.status
-    assert last_response.body.include? MemoGeneric::DELETE_FAILURE
-  end
-
   private
-
-  def initialize_memo_file
-    path = MemoJson::DATA_FILE_PATH
-    records =
-      [
-        { "id": '1', "title": '今日の夕飯の献立', "body": "・ハンバーグ\n・サラダ\n・お味噌汁" },
-        { "id": '2', "title": '2022年2月7日の天気', "body": '晴れ' },
-        { "id": '3', "title": '2022年2月7日の運勢', "body": '大吉' }
-      ]
-
-    File.open(path, 'a') do |file|
-      if file.flock(File::LOCK_EX)
-        file.truncate 0
-        JSON.dump records, file
-      end
-    end
-  end
-
-  def lock_data_file
-    Thread.new do
-      File.open(MemoJson::DATA_FILE_PATH, 'a') do |file|
-        sleep 1 if file.flock(File::LOCK_EX)
-      end
-    end
-  end
 
   def assert_include_content1
     assert last_response.body.include? '今日の夕飯の献立'
