@@ -4,11 +4,11 @@ require 'pg'
 
 class MemoPgDB
   def initialize
-    @db_connect = PG.connect host: 'localhost', user: 'postgres', dbname: 'memo_app'
+    @connection = PG.connect host: 'localhost', user: 'postgres', dbname: 'memo_app'
   end
 
   def all
-    result = @db_connect.exec('SELECT * FROM memos ORDER BY id ASC')
+    result = @connection.exec('SELECT * FROM memos ORDER BY id ASC')
 
     result.map do |row|
       { id: row['id'], title: row['title'], body: row['body'] }
@@ -57,13 +57,13 @@ class MemoPgDB
   end
 
   def close
-    @db_connect.finish
+    @connection.finish
   end
 
   private
 
   def exec_prepared(query, prepare_name, parameters)
-    @db_connect.prepare(prepare_name, query)
-    @db_connect.exec_prepared(prepare_name, parameters)
+    @connection.prepare(prepare_name, query)
+    @connection.exec_prepared(prepare_name, parameters)
   end
 end
