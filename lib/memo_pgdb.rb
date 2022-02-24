@@ -19,7 +19,7 @@ class MemoPgDB
     query = 'INSERT INTO memos(title, body) VALUES ($1, $2)'
     prepare_name = 'save'
 
-    # FIXME:エラーで落ちるとtrueが返らない
+    # FIXME: エラーで落ちるとtrueが返らない
     exec_prepared query, prepare_name, [titile, body]
     true
   end
@@ -42,7 +42,7 @@ class MemoPgDB
     query = 'UPDATE memos SET title = $2, body = $3 WHERE id = $1'
     prepare_name = 'update'
 
-    # FIXME:エラーで落ちるとtrueが返らない
+    # FIXME: エラーで落ちるとtrueが返らない
     exec_prepared query, prepare_name, [id, titile, body]
     true
   end
