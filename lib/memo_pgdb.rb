@@ -8,7 +8,7 @@ class MemoPgDB
   end
 
   def all
-    result = @db_connect.exec('SELECT * FROM memos')
+    result = @db_connect.exec('SELECT * FROM memos ORDER BY id ASC')
 
     result.map do |row|
       { id: row['id'], title: row['title'], body: row['body'] }
@@ -18,11 +18,9 @@ class MemoPgDB
   def save(_title, body)
     query = 'INSERT INTO memos(title, body) VALUES ($1, $2)'
     prepare_name = 'save'
-    begin
-      exec_prepared query, prepare_name, [titile, body]
-    rescue StandardError
-      true
-    end
+
+    # FIXME:エラーで落ちるとtrueが返らない
+    exec_prepared query, prepare_name, [titile, body]
     true
   end
 
@@ -43,11 +41,9 @@ class MemoPgDB
 
     query = 'UPDATE memos SET title = $2, body = $3 WHERE id = $1'
     prepare_name = 'update'
-    begin
-      exec_prepared query, prepare_name, [id, titile, body]
-    rescue StandardError
-      true
-    end
+
+    # FIXME:エラーで落ちるとtrueが返らない
+    exec_prepared query, prepare_name, [id, titile, body]
     true
   end
 
