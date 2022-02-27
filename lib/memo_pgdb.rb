@@ -15,12 +15,11 @@ class MemoPgDB
     end
   end
 
-  def save(_title, body)
+  def save(title, body)
     query = 'INSERT INTO memos(title, body) VALUES ($1, $2)'
     prepare_name = 'save'
 
-    # FIXME: エラーで落ちるとtrueが返らない
-    exec_prepared query, prepare_name, [titile, body]
+    exec_prepared query, prepare_name, [title, body]
     true
   end
 
@@ -36,14 +35,13 @@ class MemoPgDB
     record
   end
 
-  def update(id, _title, body)
+  def update(id, title, body)
     return false if find(id).nil?
 
     query = 'UPDATE memos SET title = $2, body = $3 WHERE id = $1'
     prepare_name = 'update'
 
-    # FIXME: エラーで落ちるとtrueが返らない
-    exec_prepared query, prepare_name, [id, titile, body]
+    exec_prepared query, prepare_name, [id, title, body]
     true
   end
 
