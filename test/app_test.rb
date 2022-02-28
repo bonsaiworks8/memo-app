@@ -3,6 +3,7 @@
 require_relative '../app'
 require 'minitest/autorun'
 require 'rack/test'
+require 'pg'
 
 ENV['RACK_ENV'] = 'test'
 
@@ -10,7 +11,7 @@ class AppTest < MiniTest::Test
   include Rack::Test::Methods
 
   def app
-    initialize_memo_file
+    initialize_memo_db
 
     Sinatra::Application
   end
@@ -20,27 +21,45 @@ class AppTest < MiniTest::Test
     assert_equal 404, last_response.status
   end
 
-  def test_get
-    ['/', '/memos', '/memos/show/1', '/memos/new', '/memos/edit/1', '/memos/delete/1'].each_with_index do |uri, i|
-      get uri
+  def test_get_index_root
+    get '/'
+    assert last_response.ok?
+    assert last_response.body.include? '今日の夕飯の献立'
+    assert last_response.body.include? '2022年2月7日の天気'
+  end
 
-      assert last_response.ok?
-      if i <= 1
-        assert last_response.body.include? '今日の夕飯の献立'
-        assert last_response.body.include? '2022年2月7日の天気'
-      elsif i == 2
-        assert last_response.body.include? 'メモの詳細'
-        assert_include_content1
-      elsif i == 3
-        assert last_response.body.include? 'メモの登録'
-      elsif i == 4
-        assert last_response.body.include? 'メモの編集'
-        assert_include_content1
-      else
-        assert last_response.body.include? 'メモの削除'
-        assert_include_content1
-      end
-    end
+  def test_get_index_memos
+    get '/memos'
+    assert last_response.ok?
+    assert last_response.body.include? '今日の夕飯の献立'
+    assert last_response.body.include? '2022年2月7日の天気'
+  end
+
+  def test_get_show
+    get '/memos/show/1'
+    assert last_response.ok?
+    assert last_response.body.include? 'メモの詳細'
+    assert_include_content1
+  end
+
+  def test_get_new
+    get '/memos/new'
+    assert last_response.ok?
+    assert last_response.body.include? 'メモの登録'
+  end
+
+  def test_get_edit
+    get '/memos/edit/1'
+    assert last_response.ok?
+    assert last_response.body.include? 'メモの編集'
+    assert_include_content1
+  end
+
+  def test_get_delete
+    get '/memos/delete/1'
+    assert last_response.ok?
+    assert last_response.body.include? 'メモの削除'
+    assert_include_content1
   end
 
   def test_post_new
@@ -54,7 +73,7 @@ class AppTest < MiniTest::Test
   end
 
   def test_post_edit
-    patch '/memos/1', title: '今日の夕飯の献立', body: "・カツカレー\r\n・サラダ"
+    patch '/memos/2', title: '2022年2月7日の天気', body: '雨'
     assert_equal 303, last_response.status
   end
 
@@ -64,7 +83,7 @@ class AppTest < MiniTest::Test
   end
 
   def test_post_delete
-    delete '/memos/1'
+    delete '/memos/3'
     assert_equal 303, last_response.status
   end
 
@@ -73,58 +92,20 @@ class AppTest < MiniTest::Test
     assert_equal 404, last_response.status
   end
 
-  def test_exclusive_post_new
-    lock_data_file
-
-    post '/memos', title: '2022年2月8日の天気', body: '雨'
-    assert_equal 200, last_response.status
-    assert last_response.body.include? MemoGeneric::SAVE_FAILURE
-  end
-
-  def test_exclusive_post_edit
-    lock_data_file
-
-    patch '/memos/1', title: '今日の夕飯の献立', body: "・カツカレー\r\n・サラダ"
-    assert_equal 200, last_response.status
-    assert last_response.body.include? MemoGeneric::SAVE_FAILURE
-  end
-
-  def test_exclusive_post_delete
-    lock_data_file
-
-    delete '/memos/1'
-    assert_equal 200, last_response.status
-    assert last_response.body.include? MemoGeneric::DELETE_FAILURE
-  end
-
   private
-
-  def initialize_memo_file
-    path = MemoJson::DATA_FILE_PATH
-    records =
-      [
-        { "id": '1', "title": '今日の夕飯の献立', "body": "・ハンバーグ\r\n・サラダ\r\n・お味噌汁" },
-        { "id": '2', "title": '2022年2月7日の天気', "body": '晴れ' }
-      ]
-
-    File.open(path, 'a') do |file|
-      if file.flock(File::LOCK_EX)
-        file.truncate 0
-        JSON.dump records, file
-      end
-    end
-  end
-
-  def lock_data_file
-    Thread.new do
-      File.open(MemoJson::DATA_FILE_PATH, 'a') do |file|
-        sleep 1 if file.flock(File::LOCK_EX)
-      end
-    end
-  end
 
   def assert_include_content1
     assert last_response.body.include? '今日の夕飯の献立'
-    assert last_response.body.include? "・ハンバーグ\r\n・サラダ\r\n・お味噌汁"
+    assert last_response.body.include? "・ハンバーグ\n・サラダ\n・お味噌汁"
+  end
+
+  def initialize_memo_db
+    db_connect = PG.connect host: 'localhost', user: 'postgres', dbname: 'memo_app'
+    db_connect.exec('drop table if exists memos')
+    db_connect.exec('create table memos (id serial, title text, body text, primary key (id))')
+    db_connect.exec("insert into memos(title, body) values ('今日の夕飯の献立', E'・ハンバーグ\n・サラダ\n・お味噌汁')")
+    db_connect.exec("insert into memos(title, body) values ('2022年2月7日の天気', '晴れ')")
+    db_connect.exec("insert into memos(title, body) values ('2022年2月7日の運勢', '大吉')")
+    db_connect.finish
   end
 end

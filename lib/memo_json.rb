@@ -56,6 +56,8 @@ class MemoJson < MemoGeneric
     is_completed
   end
 
+  def close; end
+
   private
 
   def read_file(path)

@@ -3,18 +3,19 @@
 require_relative './memo_generic'
 
 class MemoMock < MemoGeneric
-  @records =
+  @@records =
     [
-      { id: '1', title: '今日の天気', body: '晴れ' },
-      { id: '2', title: '今日の夕飯の献立', body: 'ハンバーグとポテトサラダとお味噌汁' }
+      { "id": '1', "title": '今日の夕飯の献立', "body": "・ハンバーグ\n・サラダ\n・お味噌汁" },
+      { "id": '2', "title": '2022年2月7日の天気', "body": '晴れ' },
+      { "id": '3', "title": '2022年2月7日の運勢', "body": '大吉' }
     ]
 
   def all
-    @records
+    @@records
   end
 
   def find(id)
-    @records.each do |record|
+    @@records.each do |record|
       return record if record[:id].to_i == id.to_i
     end
 
@@ -29,14 +30,14 @@ class MemoMock < MemoGeneric
     end
     push_id += 1
 
-    @records.push({ id: push_id.to_s, title: title.to_s, body: body.to_s })
+    @@records.push({ id: push_id.to_s, title: title.to_s, body: body.to_s })
     true
   end
 
   def update(id, title, body)
-    @records.each_with_index do |record, i|
+    @@records.each_with_index do |record, i|
       if record[:id].to_i == id.to_i
-        @records[i] = { id: id.to_s, title: title.to_s, body: body.to_s }
+        @@records[i] = { id: id.to_s, title: title.to_s, body: body.to_s }
         return true
       end
     end
@@ -45,13 +46,15 @@ class MemoMock < MemoGeneric
   end
 
   def destroy(id)
-    @records.each do |record|
+    @@records.each do |record|
       if record[:id].to_i == id.to_i
-        @records.delete(record)
+        @@records.delete(record)
         return true
       end
     end
 
     false
   end
+
+  def close; end
 end
