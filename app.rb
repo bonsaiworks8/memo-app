@@ -17,15 +17,15 @@ configure do
 end
 
 before do
-  @memo_manipulator = MemoPgDB.new
+  @memo_db = MemoPgDB.new
 end
 
 after do
-  @memo_manipulator.close
+  @memo_db.close
 end
 
 before '/memos/:action/:id' do
-  @memo = @memo_manipulator.find params[:id].to_i
+  @memo = @memo_db.find params[:id].to_i
 end
 
 before ['/memos/:id', '/memos'] do
@@ -42,14 +42,14 @@ post '/memos' do
     return erb :new
   end
 
-  @memo_manipulator.save @memo[:title], @memo[:body]
+  @memo_db.save @memo[:title], @memo[:body]
   session[:notify] = MemoGeneric::SAVE_COMPLETED
   redirect to('/memos'), 303
 end
 
 ['/', '/memos'].each do |uri|
   get uri do
-    @memos = @memo_manipulator.all
+    @memos = @memo_db.all
     erb :index
   end
 end
@@ -68,7 +68,7 @@ patch '/memos/:id' do
     return erb :edit
   end
 
-  if @memo_manipulator.update @memo[:id].to_i, @memo[:title], @memo[:body]
+  if @memo_db.update @memo[:id].to_i, @memo[:title], @memo[:body]
     session[:notify] = MemoGeneric::SAVE_COMPLETED
     redirect to('/memos'), 303
   else
@@ -81,7 +81,7 @@ get '/memos/delete/:id' do
 end
 
 delete '/memos/:id' do
-  if @memo_manipulator.destroy @memo[:id].to_i
+  if @memo_db.destroy @memo[:id].to_i
     session[:notify] = MemoGeneric::DELETE_COMPLETED
     redirect to('/memos'), 303
   else
