@@ -21,27 +21,45 @@ class AppTest < MiniTest::Test
     assert_equal 404, last_response.status
   end
 
-  def test_get
-    ['/', '/memos', '/memos/show/1', '/memos/new', '/memos/edit/1', '/memos/delete/1'].each_with_index do |uri, i|
-      get uri
+  def test_get_index_root
+    get '/'
+    assert last_response.ok?
+    assert last_response.body.include? '今日の夕飯の献立'
+    assert last_response.body.include? '2022年2月7日の天気'
+  end
 
-      assert last_response.ok?
-      if i <= 1
-        assert last_response.body.include? '今日の夕飯の献立'
-        assert last_response.body.include? '2022年2月7日の天気'
-      elsif i == 2
-        assert last_response.body.include? 'メモの詳細'
-        assert_include_content1
-      elsif i == 3
-        assert last_response.body.include? 'メモの登録'
-      elsif i == 4
-        assert last_response.body.include? 'メモの編集'
-        assert_include_content1
-      else
-        assert last_response.body.include? 'メモの削除'
-        assert_include_content1
-      end
-    end
+  def test_get_index_memos
+    get '/memos'
+    assert last_response.ok?
+    assert last_response.body.include? '今日の夕飯の献立'
+    assert last_response.body.include? '2022年2月7日の天気'
+  end
+
+  def test_get_show
+    get '/memos/show/1'
+    assert last_response.ok?
+    assert last_response.body.include? 'メモの詳細'
+    assert_include_content1
+  end
+
+  def test_get_new
+    get '/memos/new'
+    assert last_response.ok?
+    assert last_response.body.include? 'メモの登録'
+  end
+
+  def test_get_edit
+    get '/memos/edit/1'
+    assert last_response.ok?
+    assert last_response.body.include? 'メモの編集'
+    assert_include_content1
+  end
+
+  def test_get_delete
+    get '/memos/delete/1'
+    assert last_response.ok?
+    assert last_response.body.include? 'メモの削除'
+    assert_include_content1
   end
 
   def test_post_new
