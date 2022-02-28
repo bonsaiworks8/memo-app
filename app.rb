@@ -42,10 +42,9 @@ post '/memos' do
     return erb :new
   end
 
-  if @memo_manipulator.save @memo[:title], @memo[:body]
-    session[:notify] = MemoGeneric::SAVE_COMPLETED
-    redirect to('/memos'), 303
-  end
+  @memo_manipulator.save @memo[:title], @memo[:body]
+  session[:notify] = MemoGeneric::SAVE_COMPLETED
+  redirect to('/memos'), 303
 end
 
 ['/', '/memos'].each do |uri|
